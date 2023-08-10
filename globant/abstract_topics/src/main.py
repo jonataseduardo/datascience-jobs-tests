@@ -22,8 +22,7 @@ def get_abstract_from_xml(xml_path: str) -> str:
 
 
 files = sorted(Path("data").rglob("*.xml"))
-abstracts = [get_abstract_from_xml(str(f)) for f in files]
-
+abstracts = [_ for _ in [get_abstract_from_xml(str(f)) for f in files] if _ != "None"]
 
 # Step 1 - Extract embeddings
 embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
@@ -65,9 +64,11 @@ topics, probs = topic_model.fit_transform(abstracts)
 topic_model.get_topic_info().iloc[:, :3]
 
 # Reduce outliers
-new_topics = topic_model.reduce_outliers(abstracts, topics)
+# new_topics = topic_model.reduce_outliers(abstracts, topics)
 # Reduce outliers with pre-calculate embeddings instead
-# new_topics = topic_model.reduce_outliers(abstracts, topics, strategy="embeddings", embeddings=embeddings)
+new_topics = topic_model.reduce_outliers(
+    abstracts, topics, strategy="embeddings", embeddings=embeddings
+)
 
 topic_model.update_topics(abstracts, topics=new_topics)
 topic_model.get_topic_info().Name
